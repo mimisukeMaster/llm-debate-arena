@@ -108,7 +108,7 @@ export default function Home() {
               disabled={history.length > 0 || isFetchingTrend}
               className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 px-4 py-3 rounded-lg font-bold transition-colors whitespace-nowrap"
             >
-              {isFetchingTrend ? "取得中..." : "✨ トレンド"}
+              {isFetchingTrend ? "取得中..." : "トレンドから生成"}
             </button>
             {/* ここまで */}
 

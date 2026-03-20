@@ -1,14 +1,14 @@
 import os
 import httpx
 import base64
+import urllib.request
+import xml.etree.ElementTree as ET
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from openai import AsyncOpenAI
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
-import urllib.request
-import xml.etree.ElementTree as ET
 
 # .envファイルから環境変数を読み込む
 load_dotenv()
@@ -35,8 +35,7 @@ openrouter_client = AsyncOpenAI(
     base_url="https://openrouter.ai/api/v1"
 )
 
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-gemini_model = genai.GenerativeModel('gemini-flash-latest')
+gemini_client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 class DebateRequest(BaseModel):
     topic: str
@@ -49,7 +48,7 @@ async def generate_audio(text: str, speaker_id: int) -> str:
         # 1. 音声合成用のクエリ（設計図）を作成
         query_res = await client.post(
             "http://127.0.0.1:50021/audio_query",
-            params={"text": text, "speaker": speaker_id}
+            params={"text": text, "speaker": speaker_id, "speedScale" : 1.5 if speaker_id == 3 else 1.0}
         )
         query_res.raise_for_status()
         query_data = query_res.json()
@@ -82,7 +81,10 @@ async def generate_next_turn(request: DebateRequest):
     100文字程度で簡潔に指示を出してください。最初のターンであれば、議論の口火を切るよう指示してください。
     """
     
-    judge_response = await gemini_model.generate_content_async(judge_prompt)
+    judge_response = await gemini_client.aio.models.generate_content(
+        model='gemini-flash-latest',
+        contents=judge_prompt
+    )
     judge_instruction = judge_response.text
 
     # 2. 手番のLLMに発言を生成させる
@@ -126,25 +128,28 @@ async def generate_next_turn(request: DebateRequest):
 @app.get("/api/trend")
 async def get_trending_topic():
     try:
-        # 1. Googleニュース(日本)のRSSから最新の見出しを5つ取得
+        # 1. Googleニュース(日本)のRSSから最新の見出しを10つ取得
         url = "https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja"
         req = urllib.request.Request(url)
         with urllib.request.urlopen(req) as response:
             xml_data = response.read()
         
         root = ET.fromstring(xml_data)
-        headlines = [item.find('title').text for item in root.findall('.//item')[:5]]
+        headlines = [item.find('title').text for item in root.findall('.//item')[:10]]
         
         # 2. Geminiにニュースを渡し、ディベートのテーマを考案させる
         prompt = f"""
-        以下の最新ニュースの見出しを参考に、AI同士が意見を真っ二つに分けて白熱した議論ができそうなディベートのテーマを「1つ」だけ作成してください。
-        出力は余計な説明を省き、テーマの文字列のみ（例：〇〇は規制されるべきか？）としてください。
+        以下の最新ニュースの見出しを参考に、意見が真っ二つに割れて白熱した議論ができそうなディベートのテーマを「1つ」だけ作成してください。
+        出力は余計な説明を省き、40文字以内でテーマの文字列のみ（例：〇〇は規制されるべきか？、〇〇は廃止すべきか？、◯◯は評価されるべきか？など）としてください。
         
         最新ニュース見出し:
         {', '.join(headlines)}
         """
         
-        response = await gemini_model.generate_content_async(prompt)
+        response = await gemini_client.aio.models.generate_content(
+            model='gemini-flash-latest',
+            contents=prompt
+        )
         return {"topic": response.text.strip()}
 
     except Exception as e:
