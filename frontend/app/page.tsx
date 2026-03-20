@@ -14,6 +14,25 @@ export default function Home() {
   const [nextSpeaker, setNextSpeaker] = useState("A");
   const [isLoading, setIsLoading] = useState(false);
   const [judgeComment, setJudgeComment] = useState("");
+  
+  // --- 追加1: トレンド取得中の状態 ---
+  const [isFetchingTrend, setIsFetchingTrend] = useState(false);
+
+  // --- 追加2: トレンドを取得する関数 ---
+  const handleFetchTrend = async () => {
+    setIsFetchingTrend(true);
+    try {
+      const res = await fetch("http://localhost:8000/api/trend");
+      if (!res.ok) throw new Error("トレンド取得失敗");
+      const data = await res.json();
+      setTopic(data.topic);
+    } catch (error) {
+      console.error(error);
+      alert("トレンドの取得に失敗しました。FastAPIサーバーを確認してください。");
+    } finally {
+      setIsFetchingTrend(false);
+    }
+  };
 
   const handleNextTurn = async () => {
     if (!topic) {
@@ -71,19 +90,32 @@ export default function Home() {
         {/* ヘッダー＆テーマ入力 */}
         <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
           <h1 className="text-3xl font-bold mb-4 text-center text-blue-400">LLM Debate Arena</h1>
-          <div className="flex gap-4">
+          
+          {/* 追加3: 隙間をgap-4からgap-2に縮め、トレンドボタンを真ん中に挿入 */}
+          <div className="flex gap-2">
             <input
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               disabled={history.length > 0}
               className="flex-1 bg-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-              placeholder="ディベートのテーマを入力..."
+              placeholder="テーマを入力、または自動取得..."
             />
+            
+            {/* ここからトレンドボタン */}
+            <button
+              onClick={handleFetchTrend}
+              disabled={history.length > 0 || isFetchingTrend}
+              className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 px-4 py-3 rounded-lg font-bold transition-colors whitespace-nowrap"
+            >
+              {isFetchingTrend ? "取得中..." : "✨ トレンド"}
+            </button>
+            {/* ここまで */}
+
             <button
               onClick={handleNextTurn}
               disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-8 py-3 rounded-lg font-bold transition-colors flex items-center justify-center min-w-[160px]"
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-8 py-3 rounded-lg font-bold transition-colors flex items-center justify-center min-w-40"
             >
               {isLoading ? "思考中..." : history.length === 0 ? "ディベート開始" : "次のターンへ"}
             </button>

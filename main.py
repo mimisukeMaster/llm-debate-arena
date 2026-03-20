@@ -7,6 +7,8 @@ from pydantic import BaseModel
 from openai import AsyncOpenAI
 import google.generativeai as genai
 from dotenv import load_dotenv
+import urllib.request
+import xml.etree.ElementTree as ET
 
 # .envファイルから環境変数を読み込む
 load_dotenv()
@@ -93,22 +95,12 @@ async def generate_next_turn(request: DebateRequest):
     """
 
     if request.next_speaker == "A":
-        # ディベーターA: OpenRouter経由
-        try:
-            # 第一希望: Qwen (混雑しやすいが賢い)
-            response = await openrouter_client.chat.completions.create(
-                model="qwen/qwen3-next-80b-a3b-instruct:free",
-                messages=[{"role": "user", "content": speaker_prompt}],
-                temperature=0.7
-            )
-        except Exception as e:
-            print(f"第一希望のモデルが混雑しています。代替モデルに切り替えます: {e}")
-            # 第二希望: Zhipu AIのGLM (レスポンスが速く安定している中国系)
-            response = await openrouter_client.chat.completions.create(
-                model="z-ai/glm-4.5-air:free",
-                messages=[{"role": "user", "content": speaker_prompt}],
-                temperature=0.7
-            )
+        # ディベーターA(Zhipu AIのGLM): OpenRouter経由
+        response = await openrouter_client.chat.completions.create(
+            model="z-ai/glm-4.5-air:free",
+            messages=[{"role": "user", "content": speaker_prompt}],
+            temperature=0.7
+        )
     else:
         # ディベーターB(Llama 3): Groq経由
         response = await groq_client.chat.completions.create(
@@ -129,3 +121,32 @@ async def generate_next_turn(request: DebateRequest):
         "judge_comment": judge_instruction,
         "audio_base64": audio_base64
     }
+
+# ディベートのテーマを決めるエンドポイント
+@app.get("/api/trend")
+async def get_trending_topic():
+    try:
+        # 1. Googleニュース(日本)のRSSから最新の見出しを5つ取得
+        url = "https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja"
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req) as response:
+            xml_data = response.read()
+        
+        root = ET.fromstring(xml_data)
+        headlines = [item.find('title').text for item in root.findall('.//item')[:5]]
+        
+        # 2. Geminiにニュースを渡し、ディベートのテーマを考案させる
+        prompt = f"""
+        以下の最新ニュースの見出しを参考に、AI同士が意見を真っ二つに分けて白熱した議論ができそうなディベートのテーマを「1つ」だけ作成してください。
+        出力は余計な説明を省き、テーマの文字列のみ（例：〇〇は規制されるべきか？）としてください。
+        
+        最新ニュース見出し:
+        {', '.join(headlines)}
+        """
+        
+        response = await gemini_model.generate_content_async(prompt)
+        return {"topic": response.text.strip()}
+
+    except Exception as e:
+        print(f"トレンド取得エラー: {e}")
+        return {"topic": "現代社会におけるSNSの匿名性は廃止すべきか？"} # エラー時のフォールバック
