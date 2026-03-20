@@ -2,6 +2,7 @@ import os
 import httpx
 import base64
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from openai import AsyncOpenAI
 import google.generativeai as genai
@@ -11,6 +12,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI(title="LLM Debate Arena API")
+
+# フロント/バックでの連携を行うためCORSを許可
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # クライアントの初期化
 groq_client = AsyncOpenAI(
