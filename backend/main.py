@@ -45,7 +45,7 @@ class DebateRequest(BaseModel):
 # 音声合成のエンドポイント
 async def generate_audio(text: str, speaker_id: int) -> str:
     async with httpx.AsyncClient(timeout=30.0) as client:
-        # 1. 音声合成用のクエリ（設計図）を作成
+        # クエリ作成
         query_res = await client.post(
             "http://127.0.0.1:50021/audio_query",
             params={"text": text, "speaker": speaker_id, "speedScale" : 1.5 if speaker_id == 3 else 1.0}
@@ -53,7 +53,7 @@ async def generate_audio(text: str, speaker_id: int) -> str:
         query_res.raise_for_status()
         query_data = query_res.json()
 
-        # 2. クエリをもとにWAV音声データを生成
+        # WAV音声データを生成
         synth_res = await client.post(
             "http://127.0.0.1:50021/synthesis",
             params={"speaker": speaker_id},
@@ -61,12 +61,13 @@ async def generate_audio(text: str, speaker_id: int) -> str:
         )
         synth_res.raise_for_status()
 
-        # フロントエンドに送りやすいようにWAVデータをBase64エンコードして返す
+        # WAVデータをBase64エンコードして返す
         return base64.b64encode(synth_res.content).decode('utf-8')
 
+# ディベートの次の発言を生成するエンドポイント
 @app.post("/api/debate/next")
 async def generate_next_turn(request: DebateRequest):
-    # 1. Gemini(ジャッジ)による現状分析
+    # ジャッジによる現状分析
     history_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in request.history])
     if not history_text:
         history_text = "（まだ発言はありません）"
@@ -87,7 +88,7 @@ async def generate_next_turn(request: DebateRequest):
     )
     judge_instruction = judge_response.text
 
-    # 2. 手番のLLMに発言を生成させる
+    # 手番のLLMに発言を生成させる
     speaker_prompt = f"""
     テーマ: {request.topic}
     あなたは {request.next_speaker} の立場でディベートをしています。
@@ -113,7 +114,7 @@ async def generate_next_turn(request: DebateRequest):
         
     next_argument = response.choices[0].message.content
 
-    # Aは「ずんだもん(3)」、Bは「四国めたん(2)」の声を割り当て
+    # Aは「ずんだもん(3)」、Bは「四国めたん(2)」の声
     speaker_id = 3 if request.next_speaker == "A" else 2
     audio_base64 = await generate_audio(next_argument, speaker_id)
 
@@ -128,7 +129,7 @@ async def generate_next_turn(request: DebateRequest):
 @app.get("/api/trend")
 async def get_trending_topic():
     try:
-        # 1. Googleニュース(日本)のRSSから最新の見出しを10つ取得
+        # GoogleニュースのRSSから最新の見出しを10つ取得
         url = "https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja"
         req = urllib.request.Request(url)
         with urllib.request.urlopen(req) as response:
@@ -137,7 +138,7 @@ async def get_trending_topic():
         root = ET.fromstring(xml_data)
         headlines = [item.find('title').text for item in root.findall('.//item')[:10]]
         
-        # 2. Geminiにニュースを渡し、ディベートのテーマを考案させる
+        # ディベートのテーマを考案させる
         prompt = f"""
         以下の最新ニュースの見出しを参考に、意見が真っ二つに割れて白熱した議論ができそうなディベートのテーマを「1つ」だけ作成してください。
         出力は余計な説明を省き、40文字以内でテーマの文字列のみ（例：〇〇は規制されるべきか？、〇〇は廃止すべきか？、◯◯は評価されるべきか？など）としてください。

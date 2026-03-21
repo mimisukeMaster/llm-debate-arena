@@ -15,14 +15,14 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [judgeComment, setJudgeComment] = useState("");
   
-  // --- 追加1: トレンド取得中の状態 ---
+  // トレンド取得中の状態
   const [isFetchingTrend, setIsFetchingTrend] = useState(false);
 
-  // --- 追加2: トレンドを取得する関数 ---
+  // トレンドを取得する関数
   const handleFetchTrend = async () => {
     setIsFetchingTrend(true);
     try {
-      const res = await fetch("http://localhost:8000/api/trend");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trend`);
       if (!res.ok) throw new Error("トレンド取得失敗");
       const data = await res.json();
       setTopic(data.topic);
@@ -43,7 +43,7 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/api/debate/next", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/debate/next`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +91,6 @@ export default function Home() {
         <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
           <h1 className="text-3xl font-bold mb-4 text-center text-blue-400">LLM Debate Arena</h1>
           
-          {/* 追加3: 隙間をgap-4からgap-2に縮め、トレンドボタンを真ん中に挿入 */}
           <div className="flex gap-2">
             <input
               type="text"
@@ -102,7 +101,6 @@ export default function Home() {
               placeholder="テーマを入力、または自動取得..."
             />
             
-            {/* ここからトレンドボタン */}
             <button
               onClick={handleFetchTrend}
               disabled={history.length > 0 || isFetchingTrend}
@@ -110,7 +108,6 @@ export default function Home() {
             >
               {isFetchingTrend ? "取得中..." : "トレンドから生成"}
             </button>
-            {/* ここまで */}
 
             <button
               onClick={handleNextTurn}
@@ -122,7 +119,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ジャッジ(Gemini)の指示 */}
         {judgeComment && (
           <div className="bg-purple-900/30 border border-purple-500/50 p-4 rounded-lg">
             <p className="text-sm text-purple-300 font-bold mb-1">モデレーターからのメッセージ</p>
@@ -130,7 +126,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* チャット履歴エリア */}
         <div className="space-y-6">
           {history.map((msg, index) => (
             <div
