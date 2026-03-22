@@ -1,0 +1,33 @@
+name: Backend CD
+
+# このActionが動くときを指定
+on:
+  # backend以下が変更された時だけ
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+  # GUI実行できるボタンを表示
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy backend directory to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          cd backend
+          
+          # backend以下を独立したGitとして初期化し、Hugging Face Spaceに強制上書きプッシュする
+          git init
+          git checkout -b main
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Auto deploy backend from GitHub Actions"
+          git push --force https://mimisukeMaster:$HF_TOKEN@huggingface.co/spaces/mimisukeMaster/llm-debate-arena main

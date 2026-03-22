@@ -98,10 +98,10 @@ npm run dev
       - [x] VOICEVOXエンジン連携とBase64音声エンコード
       - [x] Next.js + Tailwind CSSによるUI実装
       - [x] RSSからのトレンドテーマ自動抽出エンドポイント実装
-  - [ ] クラウドへのデプロイ
-      - [ ] Vercelへのフロントエンドデプロイ
+  - [x] クラウドへのデプロイ
+      - [x] Vercelへのフロントエンドデプロイ
       - [x] バックエンド（FastAPI + VOICEVOX）のDockerコンテナ化
-      - [x] Hugging Face Spaces への本番デプロイ
+      - [x] Hugging Face Spaces へのデプロイ
   - [ ] ブラッシュアップ
       - [ ] 話者（音声モデル）の動的選択機能の実装
       - [ ] ディベート履歴の永続化（DB連携）
