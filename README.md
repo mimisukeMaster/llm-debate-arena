@@ -3,8 +3,8 @@
 [<img src="https://img.shields.io/badge/issues-welcome-green">](https://github.com/mimisukeMaster/llm-debate-arena/issues)
 [<img src="https://img.shields.io/badge/PRs-welcome-salmon?logo=git">](https://github.com/mimisukeMaster/llm-debate-arena/pulls)
 [![License: MIT](https://img.shields.io/badge/License-MIT-bb0000.svg)](https://opensource.org/licenses/MIT)
-<img src="https://img.shields.io/badge/deployed%20to-Vercel-000000?logo=vercel&logoColor=white">
-<img src="https://img.shields.io/badge/deployed%20to-Hugging_Face_Space-FFD21E?logo=huggingface">
+[<img src="https://img.shields.io/badge/deployed%20to-Vercel-000000?logo=vercel&logoColor=white">](https://vercel.com/mimisukemasters-projects/llm-debate-arena)
+[<img src="https://img.shields.io/badge/deployed%20to-Hugging_Face_Space-FFD21E?logo=huggingface">](https://huggingface.co/spaces/mimisukeMaster/llm-debate-arena/tree/main)
 <img src="https://img.shields.io/github/repo-size/mimisukeMaster/llm-debate-arena?logo=gitlfs&color=ff69b4">
 
 
