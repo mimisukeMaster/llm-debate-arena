@@ -4,7 +4,7 @@
 [<img src="https://img.shields.io/badge/PRs-welcome-salmon?logo=git">](https://github.com/mimisukeMaster/llm-debate-arena/pulls)
 [![License: MIT](https://img.shields.io/badge/License-MIT-bb0000.svg)](https://opensource.org/licenses/MIT)
 [<img src="https://img.shields.io/badge/deployed%20to-Vercel-000000?logo=vercel&logoColor=white">](https://vercel.com/mimisukemasters-projects/llm-debate-arena)
-[<img src="https://img.shields.io/badge/deployed%20to-Hugging_Face_Space-FFD21E?logo=huggingface">](https://huggingface.co/spaces/mimisukeMaster/llm-debate-arena/tree/main)
+[<img src="https://img.shields.io/badge/deployed%20to-Hugging_Face_Spaces-FFD21E?logo=huggingface">](https://huggingface.co/spaces/mimisukeMaster/llm-debate-arena/tree/main)
 <img src="https://img.shields.io/github/repo-size/mimisukeMaster/llm-debate-arena?logo=gitlfs&color=ff69b4">
 
 
@@ -62,13 +62,12 @@ Pythonの仮想環境（venvまたはconda）を作成し、その中で依存�
 pip install fastapi uvicorn openai google-genai pydantic python-dotenv httpx
 ```
 
-プロジェクトルートに `.env` ファイルを作成し、APIキーとバックエンドのURLを設定します。
+`backend`直下に `.env` ファイルを作成し、APIキーを設定します。
 
 ```env
 GEMINI_API_KEY=your_gemini_api_key
 GROQ_API_KEY=your_groq_api_key
 OPENROUTER_API_KEY=your_openrouter_api_key
-NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
 VOICEVOXソフトを起動し、[`http://127.0.0.1:50021`](http://127.0.0.1:50021) にてAPIを受け付けさせます。
@@ -76,6 +75,7 @@ VOICEVOXソフトを起動し、[`http://127.0.0.1:50021`](http://127.0.0.1:5002
 FastAPIサーバーを起動します。
 
 ```bash
+cd backend
 uvicorn main:app --reload
 ```
 

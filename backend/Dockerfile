@@ -3,7 +3,7 @@ FROM voicevox/voicevox_engine:cpu-ubuntu20.04-latest
 
 USER root
 
-# 最小限の通信ツール(curl)だけをインストール
+# URLからダウンロードするためcurlをインストール
 RUN apt-get update && \
     apt-get install -y curl && \
     rm -rf /var/lib/apt/lists/*
