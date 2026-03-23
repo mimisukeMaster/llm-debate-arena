@@ -186,7 +186,7 @@ export default function Home() {
             onChange={(e) => setTopic(e.target.value)}
             disabled={debateStarted}
             className="topic-input"
-            placeholder="例）AIは人類の仕事を奪うべきか？"
+            placeholder="例）SNSは人間関係を豊かにするか？"
           />
 
           {/* トレンド生成 */}
