@@ -25,6 +25,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY main.py .
 COPY start.sh .
+COPY voicevox_characters.json .
 
 RUN chmod +x start.sh
 
