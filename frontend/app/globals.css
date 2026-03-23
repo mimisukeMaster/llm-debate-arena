@@ -1,26 +1,228 @@
 @import "tailwindcss";
 
+/* ============================================
+   Design Tokens — Warm Off-White Base
+   ============================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #ede8e3;
+  --bg-subtle: #e4dfd9;
+  --surface: #f5f2ee;
+  --surface-hover: #ebe6e0;
+  --border: #d4ccC4;
+  --border-focus: #3b5bdb;
+  --text-primary: #1c1917;
+  --text-secondary: #3c3533;
+  --text-muted: #6b635e;
+  --accent: #3b5bdb;
+  --accent-hover: #2f4ac0;
+  --accent-light: #eef2ff;
+  --accent-surface: #dde3f8;
+  --speaker-a: #15573a;
+  --speaker-a-bg: #ecfaf3;
+  --speaker-a-border: #22a366;
+  --speaker-b: #9a3412;
+  --speaker-b-bg: #fff5f0;
+  --speaker-b-border: #ea580c;
+  --moderator-bg: #fffbeb;
+  --moderator-border: #ca8a04;
+  --pill-bg: #e8e3dc;
+  --pill-active-bg: #1c1917;
+  --pill-active-text: #f5f2ee;
+  --font-main: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ============================================
+   Base Reset
+   ============================================ */
+*, *::before, *::after { box-sizing: border-box; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+}
+
+/* ============================================
+   Topic Input  (underline style)
+   ============================================ */
+.topic-input {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  font-size: 1.0625rem;
+  padding: 13px 16px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+}
+
+.topic-input::placeholder {
+  color: var(--text-muted);
+}
+
+.topic-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59,91,219,0.1);
+  outline: none;
+}
+
+.topic-input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   Genre Pill Buttons
+   ============================================ */
+.genre-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.genre-pill {
+  background: var(--pill-bg);
+  border: 1.5px solid transparent;
+  border-radius: 100px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 5px 14px;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  white-space: nowrap;
+}
+
+.genre-pill:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.genre-pill.active {
+  background: var(--pill-active-bg);
+  color: var(--pill-active-text);
+}
+
+.genre-pill:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   Character Selector — Custom Styled Select
+   ============================================ */
+.char-select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.char-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2378716c' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 11px 40px 11px 14px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+}
+
+.char-select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59,91,219,0.1);
+  outline: none;
+}
+
+.char-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+.btn {
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 10px 22px;
+  transition: background 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { cursor: not-allowed; opacity: 0.45; }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+
+.btn-ghost {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--text-secondary);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+/* ============================================
+   Typing Dots
+   ============================================ */
+@keyframes typingDot {
+  0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+  30%            { opacity: 1;   transform: translateY(-4px); }
+}
+
+.typing-dots span {
+  animation: typingDot 1.1s infinite;
+  display: inline-block;
+  margin: 0 1.5px;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.30s; }
+
+/* ============================================
+   Spinner
+   ============================================ */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.spinner {
+  animation: spin 0.8s linear infinite;
+  border: 2px solid rgba(59,91,219,0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  height: 13px;
+  width: 13px;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   Divider
+   ============================================ */
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
 }
