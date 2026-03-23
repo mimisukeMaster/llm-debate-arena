@@ -81,7 +81,11 @@ uvicorn main:app --reload
 
 ### 3. Frontend Setup
 
-別のターミナルを開き、フロントエンドの依存関係をインストールして起動します。
+`frontend`直下に、`.env.local`ファイルを作成し、APIのURLを設定します。
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+新しくターミナルを開き、フロントエンドの依存関係をインストールして起動します。
 
 ```bash
 cd frontend
