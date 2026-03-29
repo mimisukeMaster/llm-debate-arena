@@ -107,8 +107,7 @@ npm run dev
       - [x] バックエンド（FastAPI + VOICEVOX）のDockerコンテナ化
       - [x] Hugging Face Spaces へのデプロイ
   - [ ] ブラッシュアップ
-      - [ ] 話者（音声モデル）の動的選択機能の実装
-      - [ ] ディベート履歴の永続化（DB連携）
+      - [x] 話者（音声モデル）の動的選択機能の実装
       - etc...
 
 ## Author
