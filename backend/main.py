@@ -1,10 +1,11 @@
 import os
+import asyncio
 import json
 import httpx
 import base64
 import urllib.request
 import xml.etree.ElementTree as ET
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from openai import AsyncOpenAI
@@ -65,25 +66,45 @@ class DebateRequest(BaseModel):
 
 # 音声合成のエンドポイント
 async def generate_audio(text: str, speaker_id: int) -> str:
+    voicevox_url = os.environ.get("VOICEVOX_URL", "http://127.0.0.1:50021").rstrip("/")
+    audio_query_url = f"{voicevox_url}/audio_query"
+    synthesis_url = f"{voicevox_url}/synthesis"
+
     async with httpx.AsyncClient(timeout=30.0) as client:
-        # クエリ作成
-        query_res = await client.post(
-            "http://127.0.0.1:50021/audio_query",
-            params={"text": text, "speaker": speaker_id, "speedScale": 1.5 if speaker_id == 3 else 1.0}
-        )
-        query_res.raise_for_status()
-        query_data = query_res.json()
+        # VoiceVox が起動直後などに一時的に繋がらないことがあるのでリトライする
+        last_error: Exception | None = None
+        for attempt in range(5):
+            try:
+                # クエリ作成
+                query_res = await client.post(
+                    audio_query_url,
+                    params={"text": text, "speaker": speaker_id, "speedScale": 1.5 if speaker_id == 3 else 1.0},
+                )
+                query_res.raise_for_status()
+                query_data = query_res.json()
 
-        # WAV音声データを生成
-        synth_res = await client.post(
-            "http://127.0.0.1:50021/synthesis",
-            params={"speaker": speaker_id},
-            json=query_data
-        )
-        synth_res.raise_for_status()
+                # WAV音声データを生成
+                synth_res = await client.post(
+                    synthesis_url,
+                    params={"speaker": speaker_id},
+                    json=query_data,
+                )
+                synth_res.raise_for_status()
 
-        # WAVデータをBase64エンコードして返す
-        return base64.b64encode(synth_res.content).decode('utf-8')
+                # WAVデータをBase64エンコードして返す
+                return base64.b64encode(synth_res.content).decode("utf-8")
+            except httpx.RequestError as e:
+                last_error = e
+                print(f"VOICEVOX接続失敗(attempt {attempt + 1}/5): {e}")
+                if attempt >= 4:
+                    break
+                # 指数バックオフ（短め）
+                await asyncio.sleep(0.5 * (2**attempt))
+
+        raise HTTPException(
+            status_code=503,
+            detail=f"VOICEVOXエンジンに接続できません: {last_error}",
+        )
 
 # ディベートの次の発言を生成するエンドポイント
 @app.post("/api/debate/next")
