@@ -5,3 +5,10 @@ google-genai
 pydantic
 python-dotenv
 httpx
+numpy
+soxr
+pyopenjtalk
+soundfile
+pyworld
+PyYAML
+jinja2
