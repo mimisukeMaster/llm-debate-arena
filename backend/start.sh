@@ -1,10 +1,22 @@
 #!/bin/bash
 
 # VOICEVOXエンジンをバックグラウンドで起動
-/opt/voicevox_engine/run &
+VOICEVOX_HOST="${VOICEVOX_HOST:-127.0.0.1}"
+VOICEVOX_PORT="${VOICEVOX_PORT:-50021}"
+
+if [ -f "/opt/voicevox_engine/run.py" ]; then
+  # VOICEVOX official image の実行エントリ
+  python /opt/voicevox_engine/run.py --host "${VOICEVOX_HOST}" --port "${VOICEVOX_PORT}" &
+elif [ -f "/opt/voicevox_engine/run" ]; then
+  # 互換用（image tag によっては実行ファイル名が違う可能性がある）
+  /opt/voicevox_engine/run --host "${VOICEVOX_HOST}" --port "${VOICEVOX_PORT}" &
+else
+  echo "VOICEVOX start entry not found: /opt/voicevox_engine/run(.py)"
+  exit 1
+fi
 
 # VOICEVOXが立ち上がるまで疎通確認しながら待機
-VOICEVOX_URL="${VOICEVOX_URL:-http://127.0.0.1:50021}"
+VOICEVOX_URL="${VOICEVOX_URL:-http://${VOICEVOX_HOST}:${VOICEVOX_PORT}}"
 VOICEVOX_VERSION_URL="${VOICEVOX_URL%/}/version"
 
 echo "Waiting VOICEVOX... (${VOICEVOX_VERSION_URL})"
