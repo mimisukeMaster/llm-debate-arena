@@ -6,7 +6,7 @@ VOICEVOX_PORT="${VOICEVOX_PORT:-50021}"
 
 if [ -f "/opt/voicevox_engine/run.py" ]; then
   # VOICEVOX official image の実行エントリ
-  python /opt/voicevox_engine/run.py --host "${VOICEVOX_HOST}" --port "${VOICEVOX_PORT}" &
+  /opt/python/bin/python3 /opt/voicevox_engine/run.py --host "${VOICEVOX_HOST}" --port "${VOICEVOX_PORT}" &
 elif [ -f "/opt/voicevox_engine/run" ]; then
   # 互換用（image tag によっては実行ファイル名が違う可能性がある）
   /opt/voicevox_engine/run --host "${VOICEVOX_HOST}" --port "${VOICEVOX_PORT}" &
