@@ -4,12 +4,12 @@
 VOICEVOX_HOST="${VOICEVOX_HOST:-127.0.0.1}"
 VOICEVOX_PORT="${VOICEVOX_PORT:-50021}"
 
-if [ -f "/opt/voicevox_engine/run.py" ]; then
-  # VOICEVOX official image の実行エントリ
-  /opt/python/bin/python3 /opt/voicevox_engine/run.py --host "${VOICEVOX_HOST}" --port "${VOICEVOX_PORT}" &
-elif [ -f "/opt/voicevox_engine/run" ]; then
-  # 互換用（image tag によっては実行ファイル名が違う可能性がある）
+if [ -f "/opt/voicevox_engine/run" ]; then
+  # 公式配布の実行バイナリ（依存を自己完結しているため最優先）
   /opt/voicevox_engine/run --host "${VOICEVOX_HOST}" --port "${VOICEVOX_PORT}" &
+elif [ -f "/opt/voicevox_engine/run.py" ]; then
+  # run バイナリが無い場合のフォールバック
+  /opt/python/bin/python3 /opt/voicevox_engine/run.py --host "${VOICEVOX_HOST}" --port "${VOICEVOX_PORT}" &
 else
   echo "VOICEVOX start entry not found: /opt/voicevox_engine/run(.py)"
   exit 1
