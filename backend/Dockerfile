@@ -1,5 +1,5 @@
 # VOICEVOX公式のCPU版Ubuntuイメージをベースにする
-FROM voicevox/voicevox_engine:cpu-ubuntu20.04-latest
+FROM voicevox/voicevox_engine:cpu-ubuntu20.04-0.20.0
 
 USER root
 
@@ -11,6 +11,13 @@ RUN apt-get update && \
 WORKDIR /app
 
 COPY requirements.txt .
+
+# VOICEVOXコア ディレクトリの存在確認とキャッシュの初期化
+RUN if [ ! -d "/opt/voicevox_engine/model" ]; then \
+      echo "VOICEVOX model directory not found, attempting to initialize..."; \
+      mkdir -p /opt/voicevox_engine/model; \
+    fi && \
+    ls -la /opt/voicevox_engine/ || echo "VOICEVOX directory structure:"
 
 # VOICEVOXエンジン側のPython依存を先に一括インストール
 # （run.pyフォールバック時の ModuleNotFoundError 連鎖を防ぐ）
