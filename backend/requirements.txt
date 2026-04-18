@@ -13,3 +13,4 @@ pyworld
 PyYAML
 jinja2
 semver
+platformdirs

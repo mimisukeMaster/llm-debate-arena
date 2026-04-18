@@ -12,6 +12,16 @@ WORKDIR /app
 
 COPY requirements.txt .
 
+# VOICEVOXエンジン側のPython依存を先に一括インストール
+# （run.pyフォールバック時の ModuleNotFoundError 連鎖を防ぐ）
+RUN if [ -f /opt/voicevox_engine/requirements.txt ]; then \
+      /opt/python/bin/python3 -m pip install --no-cache-dir -r /opt/voicevox_engine/requirements.txt; \
+    elif [ -f /opt/voicevox_engine/pyproject.toml ]; then \
+      /opt/python/bin/python3 -m pip install --no-cache-dir /opt/voicevox_engine; \
+    else \
+      echo "VOICEVOX dependency manifest not found; skip preinstall"; \
+    fi
+
 # VOICEVOXランタイムのPython環境にAPI依存を追加する
 RUN /opt/python/bin/python3 -m pip install --no-cache-dir -r requirements.txt
 
